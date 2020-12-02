@@ -7,7 +7,7 @@
       "php": "^7.3 || ^8.0",
       "ext-json": "*",
       "broadway/broadway": "^2.1",
-      "micro-module/value-object": "^0.4",
+      "micro-module/value-object": "^0.5",
       "doctrine/dbal": "^2.9"
     },
     "require-dev": {
