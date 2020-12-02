@@ -4,7 +4,7 @@
     "type": "library",
     "license": "proprietary",
     "require": {
-      "php": "^7.3",
+      "php": "^7.3 || ^8.0",
       "ext-json": "*",
       "broadway/broadway": "^2.1",
       "micro-module/value-object": "^0.4",
