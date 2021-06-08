@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MicroModule\Snapshotting\Snapshot;
 
 use MicroModule\Snapshotting\EventSourcing\AggregateAssemblerInterface;
-use MicroModule\Snapshotting\EventSourcing\AggregateFactoryInterface;
 use MicroModule\Snapshotting\Snapshot\Storage\SnapshotNotFoundException;
 use MicroModule\Snapshotting\Snapshot\Storage\SnapshotStoreInterface;
 use Assert\Assertion as Assert;
@@ -27,25 +26,17 @@ class SnapshotRepository implements SnapshotRepositoryInterface
     private $aggregateClass;
 
     /**
-     * @var AggregateFactoryInterface
-     */
-    private $aggregateFactory;
-
-    /**
      * @param SnapshotStoreInterface    $snapshotStore
      * @param string                    $aggregateClass
-     * @param AggregateFactoryInterface $aggregateFactory
      */
     public function __construct(
         SnapshotStoreInterface $snapshotStore,
-        string $aggregateClass,
-        AggregateFactoryInterface $aggregateFactory
+        string $aggregateClass
     ) {
         $this->assertExtendsEventSourcedAggregateRoot($aggregateClass);
 
         $this->snapshotStore = $snapshotStore;
         $this->aggregateClass = $aggregateClass;
-        $this->aggregateFactory = $aggregateFactory;
     }
 
     /**
@@ -57,9 +48,8 @@ class SnapshotRepository implements SnapshotRepositoryInterface
     {
         try {
             $domainMessage = $this->snapshotStore->load($id);
-            $aggregateRoot = $this->aggregateFactory->create($this->aggregateClass, $domainMessage);
 
-            return new Snapshot($aggregateRoot);
+            return new Snapshot($domainMessage->getPayload());
         } catch (SnapshotNotFoundException $e) {
             return null;
         } catch (Throwable $e) {
@@ -103,7 +93,7 @@ class SnapshotRepository implements SnapshotRepositoryInterface
             $aggregate->getAggregateRootId(),
             $snapshot->getPlayhead(),
             new Metadata([]),
-            $aggregate->assembleToValueObject()
+            $aggregate
         ));
     }
 
