@@ -1,4 +1,4 @@
-FROM php:7.3-cli
+FROM php:8.0-cli
 
 RUN apt-get update && apt-get install -y git unzip
 
@@ -13,3 +13,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # php extensions
 RUN pecl install xdebug
 RUN docker-php-ext-enable xdebug
+
+# bcmath
+RUN docker-php-ext-install bcmath
+RUN docker-php-ext-enable bcmath
