@@ -1,19 +1,32 @@
-FROM php:8.0-cli
+ARG PHP_VER
 
-RUN apt-get update && apt-get install -y git unzip
+FROM php:8.0-cli-alpine3.13
 
-ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV COMPOSER_MEMORY_LIMIT -1
+RUN apk update
+RUN apk add --no-cache bash
+RUN apk add --no-cache build-base
+RUN apk add --no-cache autoconf
+RUN apk add --no-cache automake
 
+RUN apk add --no-cache --upgrade bash && \
+    apk add libpq zip unzip tree
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN mkdir /.composer_cache
 ENV COMPOSER_CACHE_DIR /.composer_cache
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# curl for cmd
+RUN apk add --no-cache curl
 
-# php extensions
+#develop layer
 RUN pecl install xdebug
 RUN docker-php-ext-enable xdebug
 
 # bcmath
 RUN docker-php-ext-install bcmath
 RUN docker-php-ext-enable bcmath
+
+# intl
+RUN apk add --no-cache icu-dev
+RUN docker-php-ext-install intl
+RUN docker-php-ext-enable intl

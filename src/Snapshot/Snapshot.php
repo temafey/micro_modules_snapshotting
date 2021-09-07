@@ -5,30 +5,26 @@ declare(strict_types=1);
 namespace MicroModule\Snapshotting\Snapshot;
 
 use Broadway\EventSourcing\EventSourcedAggregateRoot;
+use Broadway\Snapshot\SnapshotInterface;
 
-class Snapshot
+class Snapshot implements SnapshotInterface
 {
-    /**
-     * @var int
-     */
-    private $playhead;
+    /** Playhead counter value */
+    protected int $playhead;
 
     /**
-     * @var EventSourcedAggregateRoot
+     * EventSourcedAggregateRoot object
      */
-    private $aggregateRoot;
+    protected EventSourcedAggregateRoot $aggregateRoot;
 
-    /**
-     * @param EventSourcedAggregateRoot $aggregateRoot
-     */
-    public function __construct(EventSourcedAggregateRoot $aggregateRoot)
+    public function __construct(int $playhead, EventSourcedAggregateRoot $aggregateRoot)
     {
+        $this->playhead = $playhead;
         $this->aggregateRoot = $aggregateRoot;
-        $this->playhead = $aggregateRoot->getPlayhead();
     }
 
     /**
-     * @return int
+     * Returns playhead value
      */
     public function getPlayhead(): int
     {
@@ -36,7 +32,7 @@ class Snapshot
     }
 
     /**
-     * @return EventSourcedAggregateRoot
+     * Returns EventSourcedAggregateRoot object
      */
     public function getAggregateRoot(): EventSourcedAggregateRoot
     {

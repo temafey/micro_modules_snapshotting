@@ -154,7 +154,7 @@ class SnapshottingEventSourcingRepositoryTest extends TestCase
         $aggregateRoot = $this->createAggregateRootWithEvents(5);
         $aggregateRoot->getUncommittedEvents();
 
-        return new Snapshot($aggregateRoot);
+        return new Snapshot($aggregateRoot->getPlayhead() + 1, $aggregateRoot);
     }
 
     /**

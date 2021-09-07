@@ -16,24 +16,24 @@ use Broadway\Repository\Repository;
 class SnapshottingEventSourcingRepository implements Repository
 {
     /**
-     * @var EventSourcingRepository
+     * Event sourcing repository object
      */
-    private $eventSourcingRepository;
+    protected EventSourcingRepository $eventSourcingRepository;
 
     /**
-     * @var EventStore
+     * Event store object
      */
-    private $eventStore;
+    protected EventStore $eventStore;
 
     /**
-     * @var SnapshotRepositoryInterface
+     * SnapshotRepositoryInterface
      */
-    private $snapshotRepository;
+    protected SnapshotRepositoryInterface $snapshotRepository;
 
     /**
-     * @var TriggerInterface
+     * TriggerInterface object
      */
-    private $trigger;
+    protected TriggerInterface $trigger;
 
     /**
      * SnapshottingEventSourcingRepository constructor.
@@ -66,15 +66,14 @@ class SnapshottingEventSourcingRepository implements Repository
             return $this->eventSourcingRepository->load($id);
         }
         $aggregateRoot = $snapshot->getAggregateRoot();
-        $aggregateRoot->initializeState(
-            $this->eventStore->loadFromPlayhead($id, $snapshot->getPlayhead())
-        );
+        $aggregateRoot->initializeStateFromSnapshot($snapshot);
 
         return $aggregateRoot;
     }
 
     /**
      * {@inheritdoc}
+     * @throws SnapshottingEventSourcingRepositoryException
      */
     public function save(AggregateRoot $aggregate): void
     {
@@ -84,7 +83,7 @@ class SnapshottingEventSourcingRepository implements Repository
 
         if ($this->trigger->shouldSnapshot($aggregate)) {
             $this->snapshotRepository->save(
-                new Snapshot($aggregate)
+                new Snapshot($aggregate->getPlayhead() + 1, $aggregate)
             );
         }
         $this->eventSourcingRepository->save($aggregate);
