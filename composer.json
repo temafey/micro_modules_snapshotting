@@ -6,9 +6,10 @@
     "require": {
       "php": "^8.0",
       "ext-json": "*",
-      "broadway/broadway": "^2.1",
       "doctrine/dbal": "^2.9",
-        "micro-module/value-object": "^0.6.0"
+      "micro-module/value-object": "^0.6.0",
+      "micro-module/broadway": "^2.6",
+      "micro-module/base": "^0.7.0"
     },
     "require-dev": {
       "php-parallel-lint/php-console-highlighter": "^0.5.0",

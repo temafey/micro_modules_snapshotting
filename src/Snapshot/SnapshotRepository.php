@@ -49,7 +49,7 @@ class SnapshotRepository implements SnapshotRepositoryInterface
         try {
             $domainMessage = $this->snapshotStore->load($id);
 
-            return new Snapshot($domainMessage->getPayload());
+            return new Snapshot($domainMessage->getPlayhead(), $domainMessage->getPayload());
         } catch (SnapshotNotFoundException $e) {
             return null;
         } catch (Throwable $e) {

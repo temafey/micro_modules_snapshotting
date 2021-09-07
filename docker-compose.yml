@@ -10,3 +10,5 @@ services:
       - ~/.composer/cache/:/.composer_cache/:rw
       - ./:/app:rw
     working_dir: /app
+    env_file:
+      - .env
