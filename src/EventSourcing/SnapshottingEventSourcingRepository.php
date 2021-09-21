@@ -65,8 +65,10 @@ class SnapshottingEventSourcingRepository implements Repository
         if (null === $snapshot) {
             return $this->eventSourcingRepository->load($id);
         }
+
         $aggregateRoot = $snapshot->getAggregateRoot();
-        $aggregateRoot->initializeStateFromSnapshot($snapshot);
+        $domainEventStream = $this->eventStore->loadFromPlayhead($id, $snapshot->getPlayhead());
+        $aggregateRoot->initializeStateFromSnapshot($snapshot, $domainEventStream);
 
         return $aggregateRoot;
     }
