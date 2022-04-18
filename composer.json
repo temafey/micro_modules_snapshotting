@@ -6,7 +6,7 @@
     "require": {
       "php": "^8.0",
       "ext-json": "*",
-      "doctrine/dbal": "^2.9",
+      "doctrine/dbal": "^2.9| ^3.3"",
       "micro-module/value-object": "^0.6.0",
       "micro-module/broadway": "^2.6",
       "micro-module/base": "^0.7.0"
