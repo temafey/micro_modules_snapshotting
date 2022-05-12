@@ -12,7 +12,7 @@ use Broadway\UuidGenerator\Converter\BinaryUuidConverterInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Statement as DriverStatement;
+use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Version;
@@ -31,39 +31,39 @@ class DBALSnapshotStore implements SnapshotStoreInterface
      *
      * @var Connection
      */
-    private $connection;
+    protected Connection $connection;
 
     /**
      * Saga state database table name.
      *
      * @var string
      */
-    private $tableName;
+    protected string $tableName;
 
     /**
      * @var Serializer
      */
-    private $payloadSerializer;
+    protected Serializer $payloadSerializer;
 
     /**
      * @var Serializer
      */
-    private $metadataSerializer;
+    protected Serializer $metadataSerializer;
 
     /**
-     * @var DriverStatement
+     * @var Statement
      */
-    private $loadStatement;
+    protected ?Statement $loadStatement = null;
 
     /**
      * @var bool
      */
-    private $useBinary;
+    protected bool $useBinary;
 
     /**
      * @var null|BinaryUuidConverterInterface
      */
-    private $binaryUuidConverter;
+    protected ?BinaryUuidConverterInterface $binaryUuidConverter = null;
 
     /**
      * DBALSnapshotStore constructor.
@@ -133,7 +133,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
      *
      * @throws DBALException
      */
-    private function fetch($uuid, int $offset = 0, int $count = 1)
+    protected function fetch($uuid, int $offset = 0, int $count = 1)
     {
         $statement = $this->prepareLoadStatement();
         $statement->bindValue(1, (string) $this->convertIdentifierToStorageValue($uuid));
@@ -175,7 +175,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
      *
      * @throws DBALException
      */
-    private function insertMessage(Connection $connection, DomainMessage $domainMessage): void
+    protected function insertMessage(Connection $connection, DomainMessage $domainMessage): void
     {
         $data = [
             'uuid' => (string) $this->convertIdentifierToStorageValue($domainMessage->getId()),
@@ -211,7 +211,6 @@ class DBALSnapshotStore implements SnapshotStoreInterface
     public function configureTable(?Schema $schema = null): Table
     {
         $schema = $schema ?: new Schema();
-
         $uuidColumnDefinition = [
             'type' => 'guid',
             'params' => [
@@ -226,9 +225,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
                 'fixed' => true,
             ];
         }
-
         $table = $schema->createTable($this->tableName);
-
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
         $table->addColumn('uuid', $uuidColumnDefinition['type'], $uuidColumnDefinition['params']);
         $table->addColumn('playhead', 'integer', ['unsigned' => true]);
@@ -236,7 +233,6 @@ class DBALSnapshotStore implements SnapshotStoreInterface
         $table->addColumn('metadata', 'text');
         $table->addColumn('recorded_on', 'string', ['length' => 32]);
         $table->addColumn('type', 'string', ['length' => 255]);
-
         $table->setPrimaryKey(['id']);
         $table->addUniqueIndex(['uuid', 'playhead']);
 
@@ -246,11 +242,11 @@ class DBALSnapshotStore implements SnapshotStoreInterface
     /**
      * Prepare query.
      *
-     * @return DriverStatement
+     * @return Statement
      *
      * @throws DBALException
      */
-    private function prepareLoadStatement(): DriverStatement
+    protected function prepareLoadStatement(): Statement
     {
         if (null === $this->loadStatement) {
             $query = 'SELECT uuid, playhead, metadata, payload, recorded_on
@@ -270,7 +266,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
      *
      * @return DomainMessage
      */
-    private function deserializeDomainMessage(array $row): DomainMessage
+    protected function deserializeDomainMessage(array $row): DomainMessage
     {
         return new DomainMessage(
             $this->convertStorageValueToIdentifier($row['uuid']),
@@ -286,7 +282,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
      *
      * @return mixed
      */
-    private function convertIdentifierToStorageValue($uuid)
+    protected function convertIdentifierToStorageValue($uuid)
     {
         if ($this->useBinary && $this->binaryUuidConverter) {
             try {
@@ -306,7 +302,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
      *
      * @return mixed
      */
-    private function convertStorageValueToIdentifier($uuid)
+    protected function convertStorageValueToIdentifier($uuid)
     {
         if ($this->useBinary && $this->binaryUuidConverter) {
             try {
