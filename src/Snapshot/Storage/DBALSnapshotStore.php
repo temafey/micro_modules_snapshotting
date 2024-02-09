@@ -141,7 +141,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
         $statement->bindValue(3, $offset);
         $result = $statement->execute();
 
-        return $result->fetchOne();
+        return $result->fetchAssociative();
     }
 
     /**
