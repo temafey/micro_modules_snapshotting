@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MicroModule\Snapshotting\Snapshot\Trigger;
 
+use Broadway\EventSourcing\ShouldNotStoredEvent;
 use MicroModule\Snapshotting\Snapshot\TriggerInterface;
 use Broadway\EventSourcing\EventSourcedAggregateRoot;
 
@@ -30,6 +31,9 @@ class EventCountTrigger implements TriggerInterface
         $clonedAggregateRoot = clone $aggregateRoot;
 
         foreach ($clonedAggregateRoot->getUncommittedEvents() as $domainMessage) {
+            if ($domainMessage->getPayload() instanceof ShouldNotStoredEvent) {
+                continue;
+            }
             if (0 === ($domainMessage->getPlayhead() + 1) % $this->eventCount) {
                 return true;
             }
