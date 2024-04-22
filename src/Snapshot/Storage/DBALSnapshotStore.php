@@ -139,7 +139,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
         $statement->bindValue(1, (string) $this->convertIdentifierToStorageValue($uuid));
         $statement->bindValue(2, $count);
         $statement->bindValue(3, $offset);
-        $result = $statement->execute();
+        $result = $statement->executeQuery();
 
         return $result->fetchAssociative();
     }
