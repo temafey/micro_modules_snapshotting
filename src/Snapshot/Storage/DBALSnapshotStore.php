@@ -12,12 +12,14 @@ use Broadway\UuidGenerator\Converter\BinaryUuidConverterInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Version;
 use InvalidArgumentException;
 use LogicException;
+use Throwable;
 
 /**
  * Class DBALSnapshotStore.
@@ -137,8 +139,8 @@ class DBALSnapshotStore implements SnapshotStoreInterface
     {
         $statement = $this->prepareLoadStatement();
         $statement->bindValue(1, (string) $this->convertIdentifierToStorageValue($uuid));
-        $statement->bindValue(2, $count);
-        $statement->bindValue(3, $offset);
+        $statement->bindValue(2, $count, ParameterType::INTEGER);
+        $statement->bindValue(3, $offset, ParameterType::INTEGER);
         $result = $statement->executeQuery();
 
         return $result->fetchAssociative();
@@ -249,12 +251,14 @@ class DBALSnapshotStore implements SnapshotStoreInterface
     protected function prepareLoadStatement(): Statement
     {
         if (null === $this->loadStatement) {
-            $query = 'SELECT uuid, playhead, metadata, payload, recorded_on
-                FROM '.$this->tableName.'
-                WHERE uuid = ?
-                ORDER BY playhead DESC
-                LIMIT ?
-                OFFSET ?;';
+            $query = '
+                SELECT uuid, playhead, metadata, payload, recorded_on 
+                FROM ' . $this->tableName . ' 
+                WHERE uuid = ? 
+                ORDER BY playhead DESC 
+                LIMIT ? 
+                OFFSET ?;
+            ';
             $this->loadStatement = $this->connection->prepare($query);
         }
 
@@ -287,7 +291,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
         if ($this->useBinary && $this->binaryUuidConverter) {
             try {
                 return $this->binaryUuidConverter->fromString($uuid);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 throw new InvalidIdentifierException(
                     'Only valid UUIDs are allowed to by used with the binary storage mode.'
                 );
@@ -307,7 +311,7 @@ class DBALSnapshotStore implements SnapshotStoreInterface
         if ($this->useBinary && $this->binaryUuidConverter) {
             try {
                 return $this->binaryUuidConverter->fromBytes($uuid);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 throw new InvalidIdentifierException(
                     'Could not convert binary storage value to UUID.'
                 );
