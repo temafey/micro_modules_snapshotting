@@ -9,7 +9,7 @@
       "doctrine/dbal": "^3.3 || ^4.0",
       "micro-module/value-object": "^0.6",
       "micro-module/broadway": "^2.6",
-      "micro-module/base": "^0.9"
+      "micro-module/base": "^0.9 || ^0.10"
     },
     "require-dev": {
       "php-parallel-lint/php-console-highlighter": "^1.0",
