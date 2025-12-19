@@ -10,14 +10,11 @@ use Broadway\EventStore\Exception\InvalidIdentifierException;
 use Broadway\Serializer\Serializer;
 use Broadway\UuidGenerator\Converter\BinaryUuidConverterInterface;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\ConnectionException;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Version;
-use InvalidArgumentException;
 use LogicException;
 use Throwable;
 
@@ -91,12 +88,6 @@ class DBALSnapshotStore implements SnapshotStoreInterface
         $this->tableName = $tableName;
         $this->useBinary = $useBinary;
         $this->binaryUuidConverter = $binaryUuidConverter;
-
-        if ($this->useBinary && Version::compare('2.5.0') >= 0) {
-            throw new InvalidArgumentException(
-                'The Binary storage is only available with Doctrine DBAL >= 2.5.0'
-            );
-        }
 
         if ($this->useBinary && null === $binaryUuidConverter) {
             throw new LogicException('binary UUID converter is required when using binary');
