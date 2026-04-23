@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MicroModule\Snapshotting\Snapshot\Storage;
 
 use Broadway\EventStore\EventStoreException;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 
 /**
  * Wraps exceptions thrown by the DBAL event store.
